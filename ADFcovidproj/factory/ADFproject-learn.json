@@ -1,0 +1,9 @@
+{
+	"name": "ADFproject-learn",
+	"location": "swedencentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a15b0b43-6d74-4ce1-9311-5b36d728c4e6",
+		"tenantId": "88ac1ef5-a2a8-4619-8009-08e08e94ca95"
+	}
+}
