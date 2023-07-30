@@ -1,5 +1,5 @@
 {
-	"name": "trigger_ECDC_data",
+	"name": "trigger_hospital_admissions_data",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
