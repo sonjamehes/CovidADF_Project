@@ -1,0 +1,17 @@
+{
+	"name": "trigger_ECDC_data",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-07-30T10:40:00",
+				"timeZone": "W. Europe Standard Time"
+			}
+		}
+	}
+}
