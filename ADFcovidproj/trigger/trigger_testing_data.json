@@ -1,0 +1,17 @@
+{
+	"name": "trigger_testing_data",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-07-30T10:50:00",
+				"timeZone": "W. Europe Standard Time"
+			}
+		}
+	}
+}
