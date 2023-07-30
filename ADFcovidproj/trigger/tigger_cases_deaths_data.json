@@ -3,7 +3,18 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pipe_ingest_ecdc_data",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"sourceRelativeURL": "cloudboxacademy/covid19/main/ecdc_data/testing.csv",
+					"sinkFileName": "testing.csv\n"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
