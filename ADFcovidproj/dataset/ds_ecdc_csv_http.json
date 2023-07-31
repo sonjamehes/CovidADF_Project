@@ -2,14 +2,8 @@
 	"name": "ds_ecdc_csv_http",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_http_opendata_ecdc_europa_eu",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"sourceBaseURL": {
-					"value": "@dataset().baseURL",
-					"type": "Expression"
-				}
-			}
+			"referenceName": "ls_http_opendata_exdc_suropa_eu_fixed",
+			"type": "LinkedServiceReference"
 		},
 		"parameters": {
 			"relativeURL": {
