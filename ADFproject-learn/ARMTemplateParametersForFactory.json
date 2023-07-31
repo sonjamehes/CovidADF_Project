@@ -17,6 +17,9 @@
 		"ls_http_opendata_ecdc_europa_eu_properties_typeProperties_url": {
 			"value": "@{linkedService().sourceBaseURL}"
 		},
+		"ls_http_opendata_exdc_suropa_eu_fixed_properties_typeProperties_url": {
+			"value": "@{linkedService().sourceBaseURL}"
+		},
 		"tr_ingest_population_data_properties_typeProperties_scope": {
 			"value": "/subscriptions/167ee12a-a4da-41bd-b7d3-c51cef19c0cd/resourceGroups/rg-ad-covidproject/providers/Microsoft.Storage/storageAccounts/adfcovid"
 		}
