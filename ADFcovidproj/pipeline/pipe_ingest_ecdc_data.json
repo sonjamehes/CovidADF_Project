@@ -56,7 +56,7 @@
 								"type": "Expression"
 							},
 							"baseURL": {
-								"value": "@pipeline().parameters.sourceBaseURL",
+								"value": "@pipeline().parameters.sourceRelativeURL",
 								"type": "Expression"
 							}
 						}
