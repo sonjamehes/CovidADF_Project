@@ -15,10 +15,28 @@
 			"value": "https://sa2coviddl.dfs.core.windows.net/"
 		},
 		"ls_http_opendata_ecdc_europa_eu_properties_typeProperties_url": {
-			"value": "https://raw.githubusercontent.com"
+			"value": "@{linkedService().sourceBaseURL}"
+		},
+		"tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+			"value": "cloudboxacademy/covid19/main/ecdc_data/testing.csv"
+		},
+		"tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+			"value": "testing.csv\n"
 		},
 		"tr_ingest_population_data_properties_typeProperties_scope": {
 			"value": "/subscriptions/167ee12a-a4da-41bd-b7d3-c51cef19c0cd/resourceGroups/rg-ad-covidproject/providers/Microsoft.Storage/storageAccounts/adfcovid"
+		},
+		"trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+			"value": "cloudboxacademy/covid19/main/ecdc_data/country_response.csv"
+		},
+		"trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+			"value": "country_response.csv"
+		},
+		"trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+			"value": "cloudboxacademy/covid19/main/ecdc_data/hospital_admissions.csv"
+		},
+		"trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+			"value": "hospital_admissions.csv"
 		}
 	}
 }

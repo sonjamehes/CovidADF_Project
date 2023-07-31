@@ -21,11 +21,35 @@
 		},
 		"ls_http_opendata_ecdc_europa_eu_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://raw.githubusercontent.com"
+			"defaultValue": "@{linkedService().sourceBaseURL}"
+		},
+		"tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+			"type": "string",
+			"defaultValue": "cloudboxacademy/covid19/main/ecdc_data/testing.csv"
+		},
+		"tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+			"type": "string",
+			"defaultValue": "testing.csv\n"
 		},
 		"tr_ingest_population_data_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/167ee12a-a4da-41bd-b7d3-c51cef19c0cd/resourceGroups/rg-ad-covidproject/providers/Microsoft.Storage/storageAccounts/adfcovid"
+		},
+		"trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+			"type": "string",
+			"defaultValue": "cloudboxacademy/covid19/main/ecdc_data/country_response.csv"
+		},
+		"trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+			"type": "string",
+			"defaultValue": "country_response.csv"
+		},
+		"trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+			"type": "string",
+			"defaultValue": "cloudboxacademy/covid19/main/ecdc_data/hospital_admissions.csv"
+		},
+		"trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+			"type": "string",
+			"defaultValue": "hospital_admissions.csv"
 		},
 		"containerUri": {
 			"type": "string",
@@ -66,8 +90,26 @@
 					"ls_http_opendata_ecdc_europa_eu_properties_typeProperties_url": {
 						"value": "[parameters('ls_http_opendata_ecdc_europa_eu_properties_typeProperties_url')]"
 					},
+					"tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+						"value": "[parameters('tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL')]"
+					},
+					"tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+						"value": "[parameters('tigger_cases_deaths_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName')]"
+					},
 					"tr_ingest_population_data_properties_typeProperties_scope": {
 						"value": "[parameters('tr_ingest_population_data_properties_typeProperties_scope')]"
+					},
+					"trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+						"value": "[parameters('trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL')]"
+					},
+					"trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+						"value": "[parameters('trigger_country_response_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName')]"
+					},
+					"trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL": {
+						"value": "[parameters('trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sourceRelativeURL')]"
+					},
+					"trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName": {
+						"value": "[parameters('trigger_hospital_admissions_data_properties_pipe_ingest_ecdc_data_parameters_sinkFileName')]"
 					}
 				}
 			},
