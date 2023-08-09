@@ -57,6 +57,9 @@
 				},
 				{
 					"name": "SortDaily"
+				},
+				{
+					"name": "SelectWeekly"
 				}
 			],
 			"scriptLines": [
@@ -142,7 +145,9 @@
 				"          country_code_3_digit,",
 				"          population,",
 				"          reported_year_week,",
-				"          source),",
+				"          source,",
+				"          week_end_date,",
+				"          week_start_date),",
 				"     pivotBy(indicator, ['Weekly new hospital admissions per 100k', 'Weekly new ICU admissions per 100k']),",
 				"     count = sum(value),",
 				"     columnNaming: '$V$N',",
@@ -160,7 +165,19 @@
 				"PivotWeekly sort(desc(reported_year_week, true),",
 				"     asc(country, true)) ~> SortWeekly",
 				"PivotDaily sort(desc(reported_date, true),",
-				"     asc(country, true)) ~> SortDaily"
+				"     asc(country, true)) ~> SortDaily",
+				"SortWeekly select(mapColumn(",
+				"          country,",
+				"          country_code_2_digit,",
+				"          country_code_3_digit,",
+				"          population,",
+				"          reported_year_week,",
+				"          source,",
+				"          {Weekly new hospital admissions per 100kcount},",
+				"          {Weekly new ICU admissions per 100kcount}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectWeekly"
 			]
 		}
 	}
