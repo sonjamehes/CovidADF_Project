@@ -26,7 +26,22 @@
 					"name": "DataDimDateSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_processed_hospital_admissions_weekly",
+						"type": "DatasetReference"
+					},
+					"name": "WeeklySink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_processed_hodpital_admissions_daily",
+						"type": "DatasetReference"
+					},
+					"name": "DailySink"
+				}
+			],
 			"transformations": [
 				{
 					"name": "SelectRequiredColumnAndRename"
@@ -60,6 +75,9 @@
 				},
 				{
 					"name": "SelectWeekly"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -172,12 +190,40 @@
 				"          country_code_3_digit,",
 				"          population,",
 				"          reported_year_week,",
-				"          source,",
-				"          {Weekly new hospital admissions per 100kcount},",
-				"          {Weekly new ICU admissions per 100kcount}",
+				"          reported_week_start_date = week_start_date,",
+				"          reported_week_end_date = week_end_date,",
+				"          new_hospital_occupancy_count = {Weekly new hospital admissions per 100kcount},",
+				"          new_ICU_occupancy_count = {Weekly new ICU admissions per 100kcount},",
+				"          source",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> SelectWeekly"
+				"     skipDuplicateMapOutputs: true) ~> SelectWeekly",
+				"SortDaily select(mapColumn(",
+				"          country,",
+				"          country_code_2_digit,",
+				"          country_code_3_digit,",
+				"          population,",
+				"          reported_date,",
+				"          hospital_occupancy_count = {Daily hospital occupancycount},",
+				"          ICU_occupancy_count = {Daily ICU occupancycount},",
+				"          source",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"SelectWeekly sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> WeeklySink",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> DailySink"
 			]
 		}
 	}
