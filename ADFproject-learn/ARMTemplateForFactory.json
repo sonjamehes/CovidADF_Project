@@ -599,7 +599,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/Covid-project/transformation"
+							"notebookPath": "/Covid-project/transformation/transform_population_data"
 						},
 						"linkedServiceName": {
 							"referenceName": "ls_db_covid_cluster",
