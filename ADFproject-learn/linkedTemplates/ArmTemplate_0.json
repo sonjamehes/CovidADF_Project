@@ -19,9 +19,9 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accessToken' of 'ls_db_covid_cluster'"
 		},
-		"ls_hdi_covid_cluster_password": {
+		"ls_sql_covid_db_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'ls_hdi_covid_cluster'"
+			"metadata": "Secure string for 'connectionString' of 'ls_sql_covid_db'"
 		},
 		"ls_adls_covidreportingdl_properties_typeProperties_url": {
 			"type": "string",
@@ -34,54 +34,12 @@
 		"ls_http_opendata_exdc_suropa_eu_fixed_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "@{linkedService().sourceBaseURL}"
-		},
-		"ls_hdi_covid_cluster_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "admin"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "dataflow_test",
-						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ls_ablob_covidreportingsa')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -173,6 +131,19 @@
 					"url": "[parameters('ls_http_opendata_exdc_suropa_eu_fixed_properties_typeProperties_url')]",
 					"enableServerCertificateValidation": true,
 					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_sql_covid_db')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_sql_covid_db_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -725,28 +696,32 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ls_hdi_covid_cluster')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/repeat_ds_destination_population')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_covidreportingdl",
+					"type": "LinkedServiceReference"
+				},
 				"annotations": [],
-				"type": "HDInsight",
+				"type": "DelimitedText",
 				"typeProperties": {
-					"clusterUri": "https://HDInsight-covid-cluster.azurehdinsight.net",
-					"userName": "[parameters('ls_hdi_covid_cluster_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('ls_hdi_covid_cluster_password')]"
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "population_by_age",
+						"folderPath": "population",
+						"fileSystem": "repeat"
 					},
-					"isEspEnabled": false,
-					"linkedServiceName": {
-						"referenceName": "ls_ablob_covidreportingsa",
-						"type": "LinkedServiceReference"
-					}
-				}
+					"columnDelimiter": "\t",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_ablob_covidreportingsa')]"
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_covidreportingdl')]"
 			]
 		}
 	]

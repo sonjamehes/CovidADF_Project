@@ -17,6 +17,9 @@
 		"ls_hdi_covid_cluster_password": {
 			"value": ""
 		},
+		"ls_sql_covid_db_connectionString": {
+			"value": ""
+		},
 		"ls_adls_covidreportingdl_properties_typeProperties_url": {
 			"value": "https://sa2coviddl.dfs.core.windows.net/"
 		},

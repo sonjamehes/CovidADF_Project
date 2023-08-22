@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'ls_hdi_covid_cluster'"
 		},
+		"ls_sql_covid_db_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_sql_covid_db'"
+		},
 		"ls_adls_covidreportingdl_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://sa2coviddl.dfs.core.windows.net/"
@@ -79,8 +83,8 @@
 					"ls_db_covid_cluster_accessToken": {
 						"value": "[parameters('ls_db_covid_cluster_accessToken')]"
 					},
-					"ls_hdi_covid_cluster_password": {
-						"value": "[parameters('ls_hdi_covid_cluster_password')]"
+					"ls_sql_covid_db_connectionString": {
+						"value": "[parameters('ls_sql_covid_db_connectionString')]"
 					},
 					"ls_adls_covidreportingdl_properties_typeProperties_url": {
 						"value": "[parameters('ls_adls_covidreportingdl_properties_typeProperties_url')]"
@@ -90,9 +94,6 @@
 					},
 					"ls_http_opendata_exdc_suropa_eu_fixed_properties_typeProperties_url": {
 						"value": "[parameters('ls_http_opendata_exdc_suropa_eu_fixed_properties_typeProperties_url')]"
-					},
-					"ls_hdi_covid_cluster_properties_typeProperties_userName": {
-						"value": "[parameters('ls_hdi_covid_cluster_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -111,6 +112,12 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"ls_hdi_covid_cluster_password": {
+						"value": "[parameters('ls_hdi_covid_cluster_password')]"
+					},
+					"ls_hdi_covid_cluster_properties_typeProperties_userName": {
+						"value": "[parameters('ls_hdi_covid_cluster_properties_typeProperties_userName')]"
 					},
 					"tr_ingest_population_data_properties_typeProperties_scope": {
 						"value": "[parameters('tr_ingest_population_data_properties_typeProperties_scope')]"
