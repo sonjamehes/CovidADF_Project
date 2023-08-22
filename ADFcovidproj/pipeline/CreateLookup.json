@@ -1,0 +1,66 @@
+{
+	"name": "CreateLookup",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where dataFlow = 'Sales'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "repeat_ds_SQLtable_ETLConfig",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "LookupVariable",
+					"value": {
+						"value": "@activity('Lookup1').output",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"LookupVariable": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "repeat"
+		},
+		"annotations": []
+	}
+}
