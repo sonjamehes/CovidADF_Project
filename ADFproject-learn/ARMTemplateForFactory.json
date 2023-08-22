@@ -27,6 +27,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_sql_covid_db'"
 		},
+		"repeat_ls_sql_ConfigETL_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'repeat_ls_sql_ConfigETL'"
+		},
 		"ls_adls_covidreportingdl_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://sa2coviddl.dfs.core.windows.net/"
@@ -83,15 +87,9 @@
 								}
 							},
 							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
 							},
 							"enableStaging": false,
 							"translator": {
@@ -105,14 +103,14 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "repeat_ds_source_population",
+								"referenceName": "practice_ds_configETL",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "repeat_ds_destination_population",
+								"referenceName": "repeat_ds_destination_ETLRistConfig",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -129,8 +127,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/repeat_ds_source_population')]",
-				"[concat(variables('factoryId'), '/datasets/repeat_ds_destination_population')]"
+				"[concat(variables('factoryId'), '/datasets/practice_ds_configETL')]",
+				"[concat(variables('factoryId'), '/datasets/repeat_ds_destination_ETLRistConfig')]"
 			]
 		},
 		{
@@ -1175,6 +1173,99 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/practice_ds_configETL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ablob_covidreportingsa",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "ETLConfigRist.csv",
+						"container": "practice"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_ablob_covidreportingsa')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/repeat_ds_destination_ETLRistConfig')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "repeat_ls_sql_ConfigETL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "RistETLConfigId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "srcSchema",
+						"type": "nvarchar"
+					},
+					{
+						"name": "srcTableName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "destSchema",
+						"type": "nvarchar"
+					},
+					{
+						"name": "destTableName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "dataFlow",
+						"type": "nvarchar"
+					},
+					{
+						"name": "loadType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "upsertColumn",
+						"type": "nvarchar"
+					},
+					{
+						"name": "deleteInsertDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "dateColumn",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "edw",
+					"table": "RistETLConfig"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/repeat_ls_sql_ConfigETL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/repeat_ds_destination_population')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1362,6 +1453,19 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('ls_sql_covid_db_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/repeat_ls_sql_ConfigETL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('repeat_ls_sql_ConfigETL_connectionString')]"
 				}
 			},
 			"dependsOn": []

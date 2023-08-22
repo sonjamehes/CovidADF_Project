@@ -25,6 +25,122 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/practice_ds_configETL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ablob_covidreportingsa",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "ETLConfigRist.csv",
+						"container": "practice"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/repeat_ds_destination_ETLRistConfig')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "repeat_ls_sql_ConfigETL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "RistETLConfigId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "srcSchema",
+						"type": "nvarchar"
+					},
+					{
+						"name": "srcTableName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "destSchema",
+						"type": "nvarchar"
+					},
+					{
+						"name": "destTableName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "dataFlow",
+						"type": "nvarchar"
+					},
+					{
+						"name": "loadType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "upsertColumn",
+						"type": "nvarchar"
+					},
+					{
+						"name": "deleteInsertDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "dateColumn",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "edw",
+					"table": "RistETLConfig"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/repeat_ds_destination_population')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_covidreportingdl",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "population_by_age",
+						"folderPath": "population",
+						"fileSystem": "repeat"
+					},
+					"columnDelimiter": "\t",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/repeat_ds_source_population')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -106,15 +222,9 @@
 								}
 							},
 							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
 							},
 							"enableStaging": false,
 							"translator": {
@@ -128,14 +238,14 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "repeat_ds_source_population",
+								"referenceName": "practice_ds_configETL",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "repeat_ds_destination_population",
+								"referenceName": "repeat_ds_destination_ETLRistConfig",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -152,7 +262,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/repeat_ds_source_population')]"
+				"[concat(variables('factoryId'), '/datasets/practice_ds_configETL')]",
+				"[concat(variables('factoryId'), '/datasets/repeat_ds_destination_ETLRistConfig')]"
 			]
 		},
 		{
