@@ -1,0 +1,60 @@
+{
+	"name": "repeat_ds_destination_ETLRistConfig",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "repeat_ls_sql_ConfigETL",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "RistETLConfigId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "srcSchema",
+				"type": "nvarchar"
+			},
+			{
+				"name": "srcTableName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "destSchema",
+				"type": "nvarchar"
+			},
+			{
+				"name": "destTableName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "dataFlow",
+				"type": "nvarchar"
+			},
+			{
+				"name": "loadType",
+				"type": "nvarchar"
+			},
+			{
+				"name": "upsertColumn",
+				"type": "nvarchar"
+			},
+			{
+				"name": "deleteInsertDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "dateColumn",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "edw",
+			"table": "RistETLConfig"
+		}
+	}
+}

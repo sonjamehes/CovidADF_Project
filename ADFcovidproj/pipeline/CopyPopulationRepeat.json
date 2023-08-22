@@ -27,15 +27,9 @@
 						}
 					},
 					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
 					},
 					"enableStaging": false,
 					"translator": {
@@ -49,13 +43,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "repeat_ds_source_population",
+						"referenceName": "practice_ds_configETL",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "repeat_ds_destination_population",
+						"referenceName": "repeat_ds_destination_ETLRistConfig",
 						"type": "DatasetReference"
 					}
 				]
