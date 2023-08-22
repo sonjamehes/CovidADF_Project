@@ -80,6 +80,7 @@
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
+									"wildcardFileName": "*",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -88,8 +89,10 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
+								"preCopyScript": "Truncate table [edw].[RistETLConfig]",
 								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
 							},
 							"enableStaging": false,
 							"translator": {
@@ -121,6 +124,11 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
+				"variables": {
+					"LookupVariable": {
+						"type": "Array"
+					}
+				},
 				"folder": {
 					"name": "repeat"
 				},
@@ -129,6 +137,82 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/practice_ds_configETL')]",
 				"[concat(variables('factoryId'), '/datasets/repeat_ds_destination_ETLRistConfig')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CreateLookup')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where dataFlow = 'Sales'",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "repeat_ds_SQLtable_ETLConfig",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "LookupVariable",
+							"value": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"LookupVariable": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "repeat"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/repeat_ds_SQLtable_ETLConfig')]"
 			]
 		},
 		{
@@ -1198,6 +1282,69 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_ablob_covidreportingsa')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/repeat_ds_SQLtable_ETLConfig')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "repeat_ls_sql_ConfigETL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "RistETLConfigId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "srcSchema",
+						"type": "nvarchar"
+					},
+					{
+						"name": "srcTableName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "destSchema",
+						"type": "nvarchar"
+					},
+					{
+						"name": "destTableName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "dataFlow",
+						"type": "nvarchar"
+					},
+					{
+						"name": "loadType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "upsertColumn",
+						"type": "nvarchar"
+					},
+					{
+						"name": "deleteInsertDate",
+						"type": "nvarchar"
+					},
+					{
+						"name": "dateColumn",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "edw",
+					"table": "RistETLConfig"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/repeat_ls_sql_ConfigETL')]"
 			]
 		},
 		{
