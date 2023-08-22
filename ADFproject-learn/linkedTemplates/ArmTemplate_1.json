@@ -314,6 +314,40 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Update schema name",
+						"description": "updated schema from dbo do dbs because for some reason I cannot use the dbo in AzureSQL",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "RepeatCopyPopulation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "repeat_ls_sql_ConfigETL",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "update   [edw].[RistETLConfig]  set srcSchema = 'dbs' where destSchema in ('rist', 'aux', 'edw') "
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
 					}
 				],
 				"policy": {
