@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where srcTableName= '[aa_account_map]'",
+						"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where srcTableName= 'aa_account_map'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -45,17 +45,86 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "LookupVariable",
+					"variableName": "LoopVariable",
 					"value": {
 						"value": "@activity('Lookup1').output",
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('LoopVariable')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "LogTableMapping",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderStoredProcedureName": "[edw].[sp_RistETLmapping]",
+									"storedProcedureParameters": {
+										"destSchema": {
+											"type": "String",
+											"value": "edw"
+										}
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "AzureSqlTable1",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"variables": {
-			"LookupVariable": {
+			"LoopVariable": {
 				"type": "Array"
+			},
+			"srcSchema": {
+				"type": "String",
+				"defaultValue": "dbs"
+			},
+			"destSchema": {
+				"type": "String",
+				"defaultValue": "rist"
+			},
+			"destTableName": {
+				"type": "String"
+			},
+			"srcTableName": {
+				"type": "String"
+			},
+			"columnMapping": {
+				"type": "String"
 			}
 		},
 		"folder": {
