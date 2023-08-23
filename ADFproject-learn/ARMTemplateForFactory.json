@@ -195,7 +195,7 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where srcTableName= 'aa_DimCompany'",
+								"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where srcTableName= '[aa_account_map]'",
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
@@ -283,8 +283,10 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE [dbs].[aa_account_map]",
 								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
 							},
 							"enableStaging": false,
 							"translator": {
