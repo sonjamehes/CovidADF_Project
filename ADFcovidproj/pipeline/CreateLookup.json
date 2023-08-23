@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where dataFlow = 'Sales'",
+						"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where srcTableName= 'aa_DimCompany'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},

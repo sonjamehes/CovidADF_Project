@@ -1,0 +1,16 @@
+{
+	"name": "repeat_sink_accountMap",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_covid_db",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbs",
+			"table": "aa_account_map"
+		}
+	}
+}
