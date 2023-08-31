@@ -1,0 +1,463 @@
+{
+	"name": "SalesPipeFull",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select * from  [edw].[RistETLConfig] where dataFlow = 'Sales'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "LoopVariable",
+					"value": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('LoopVariable')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "truncate then insert",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "LogTableMapping_with_Id",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"preCopyScript": {
+										"value": "@{concat('Truncate table ',item().destSchema,'.',item().destTableName)}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@json(activity('Lookup ColumnMapping').output.firstRow.json_output)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Lookup ColumnMapping",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Start log",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderStoredProcedureName": "[edw].[sp_RistETLmapping]",
+									"storedProcedureParameters": {
+										"destSchema": {
+											"value": {
+												"value": "@item().destSchema",
+												"type": "Expression"
+											}
+										},
+										"destTableName": {
+											"value": {
+												"value": "@item().destTableName",
+												"type": "Expression"
+											}
+										}
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "LogTableMapping",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderStoredProcedureName": "[edw].[sp_RistETLmapping]",
+									"storedProcedureParameters": {
+										"destSchema": {
+											"type": "String",
+											"value": "edw"
+										},
+										"destTableName": {
+											"type": "String",
+											"value": "uvw_RistETLLog"
+										}
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								}
+							}
+						},
+						{
+							"name": "Start log",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "LogTableMapping",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@concat('insert into edw.RistETLLog select '''\n,pipeline().DataFactory\n,''' as DataFactoryName,'''\n,pipeline().Pipeline\n,''' as PipelineName,'''\n,pipeline().RunId\n,''' as RunId, cast(cast('''\n,pipeline().TriggerTime\n,''' as datetime2) as datetime) as PipelineStartTime,'\n,'null'\n,' as PipelineEndTime,'\n,'0'\n,' as PipelineDurationInSecs,'''\n,pipeline()?.TriggeredByPipelineRunId\n,''' as PipelineInvokedById,'''\n,pipeline()?.TriggeredByPipelineName\n,''' as PipelineInvokedbyName,'''\n,pipeline().Pipeline\n,''' as ActivityName,'''\n,'Copy Data'\n,''' as ActivityType,'''\n,'Started'\n,''' as ExecutionStatus,'''\n,'SqlServerSource'\n,''' as SourceType,'''\n,'SqlServerSink'\n,''' as SinkType,'\n,'0'\n,' as RowsRead,'\n,'0' \n,' as RowsWritten, cast(cast('''\n,pipeline().TriggerTime\n,''' as datetime2) as datetime) as ActivityStartTime,'\n,'null'\n,' as ActivityEndTime,'\n,'0'\n ,' as ActivityDurationInSecs,'''\n ,pipeline().TriggerType\n ,''' as TriggerType,'''\n,pipeline().TriggerName\n,''' as TriggerName,'\n,'getdate()'\n,' as TriggerTime,'''\n,item().srcSchema,'.',item().srcTableName\n,''' as source, '''\n,item().destSchema,'.',item().destTableName\n,''' as sink')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Write Log End Success",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lookup Logid_success",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT LogId, [DataFactoryName], [PipelineName], [RunId], [PipelineStartTime], getdate() as [PipelineEndTime]  ,DATEDIFF(SECOND, [PipelineStartTime], getdate()) as [PipelineDurationInSecs], [PipelineInvokedById],[PipelineInvokedByName], [ActivityName], [ActivityType],',\n    '''Completed'''\n    ,' as [ExecutionStatus], [SourceType], [SinkType], '\n    ,string(activity('truncate then insert').output.rowsRead)\n    , ' as [RowsRead],'\n\t,string(activity('truncate then insert').output.rowsCopied), ' as [RowsWritten], [ActivityStartTime], getdate() as [ActivityEndTime], DATEDIFF(SECOND, [PipelineStartTime], getdate()) as [ActivityDurationInSecs], [TriggerType], [TriggerName], [TriggerTime], [source], [sink] FROM[edw].[RistETLLog] where LogId = ''', activity('Lookup Logid_success').output.firstRow.LogId,'''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"LogId"
+										]
+									},
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@json(activity('LogTableMapping_with_Id').output.firstRow.json_output)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Write Log End Fail",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lookup Logid_fail",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT LogId, [DataFactoryName], [PipelineName], [RunId], [PipelineStartTime], getdate() as [PipelineEndTime]  ,DATEDIFF(SECOND, [PipelineStartTime], getdate()) as [PipelineDurationInSecs], [PipelineInvokedById],[PipelineInvokedByName], [ActivityName], [ActivityType],',\n    '''Failed'''\n    ,' as [ExecutionStatus], [SourceType], [SinkType], '\n    ,string(activity('truncate then insert').output.rowsRead)\n    , ' as [RowsRead],'\n\t,string(activity('truncate then insert').output.rowsRead), ' as [RowsWritten], [ActivityStartTime], getdate() as [ActivityEndTime], DATEDIFF(SECOND, [PipelineStartTime], getdate()) as [ActivityDurationInSecs], [TriggerType], [TriggerName], [TriggerTime], [source], [sink] FROM[edw].[RistETLLog] where LogId = ''', activity('Lookup Logid_fail').output.firstRow.LogId,'''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"LogId"
+										]
+									},
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@json(activity('LogTableMapping_with_Id').output.firstRow.json_output)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Lookup Logid_success",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "truncate then insert",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT max(LogId) as LogId\nFROM[edw].[RistETLLog] where RunId = ''', pipeline().RunId,''''\n,' and sink = ''',item().destSchema,'.',item().destTableName,''''\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								}
+							}
+						},
+						{
+							"name": "Lookup Logid_fail",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "truncate then insert",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT max(LogId) as LogId\nFROM[edw].[RistETLLog] where RunId = ''', pipeline().RunId,''''\n,' and sink = ''',item().destSchema,'.',item().destTableName,''''\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								}
+							}
+						},
+						{
+							"name": "Wait1",
+							"description": "Wait for AA to catch up and release temp table",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "Write Log End Fail",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Write Log End Success",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 30
+							}
+						},
+						{
+							"name": "LogTableMapping_with_Id",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Lookup ColumnMapping",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderStoredProcedureName": "[edw].[sp_RistETLmapping]",
+									"storedProcedureParameters": {
+										"destSchema": {
+											"type": "String",
+											"value": "edw"
+										},
+										"destTableName": {
+											"type": "String",
+											"value": "RistETLLog"
+										}
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"srcSchema": {
+				"type": "String",
+				"defaultValue": "dbo"
+			},
+			"srcTTableName": {
+				"type": "String"
+			},
+			"destSchema": {
+				"type": "String",
+				"defaultValue": "rist"
+			},
+			"destTableName": {
+				"type": "String"
+			},
+			"LoopVariable": {
+				"type": "Array"
+			},
+			"ColumnMapping": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-05-24T09:56:26Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
